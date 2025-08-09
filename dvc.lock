@@ -1,0 +1,118 @@
+schema: '2.0'
+stages:
+  process_data:
+    cmd: python src/data/make_dataset.py --config=params.yaml
+    deps:
+    - path: data/raw/Dataset.csv
+      hash: md5
+      md5: 0f9de68e012bd3aed5fa7cdc9fc421af
+      size: 977501
+    - path: src/data/make_dataset.py
+      hash: md5
+      md5: 233a1f29f1f3871e64f288709a74bafe
+      size: 2529
+    params:
+      params.yaml:
+        data_processing:
+          test_split_ratio: 0.2
+          random_state: 42
+          target_column: Churn
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 68ffa1d7cc95230a325209781f0826c3.dir
+      size: 979271
+      nfiles: 2
+  build_features:
+    cmd: python src/features/build_features.py --config=params.yaml
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 68ffa1d7cc95230a325209781f0826c3.dir
+      size: 979271
+      nfiles: 2
+    - path: src/features/build_features.py
+      hash: md5
+      md5: e71c6ded7490dd98ff3ed52e69470e5e
+      size: 4243
+    params:
+      params.yaml:
+        features:
+          numerical_features:
+          - tenure
+          - MonthlyCharges
+          - TotalCharges
+          categorical_features:
+          - gender
+          - Partner
+          - Dependents
+          - PhoneService
+          - MultipleLines
+          - InternetService
+          - OnlineSecurity
+          - OnlineBackup
+          - DeviceProtection
+          - TechSupport
+          - StreamingTV
+          - StreamingMovies
+          - Contract
+          - PaperlessBilling
+          - PaymentMethod
+    outs:
+    - path: data/features
+      hash: md5
+      md5: d2adc7ac4ad3e05b1c46013169112547.dir
+      size: 1627870
+      nfiles: 4
+  train_model:
+    cmd: python src/models/train_model.py --config=params.yaml
+    deps:
+    - path: data/features
+      hash: md5
+      md5: d2adc7ac4ad3e05b1c46013169112547.dir
+      size: 1627870
+      nfiles: 4
+    - path: src/models/train_model.py
+      hash: md5
+      md5: 9b0ac1851b60b4b7eba2f65e6901c4a2
+      size: 4314
+    params:
+      params.yaml:
+        features:
+          numerical_features:
+          - tenure
+          - MonthlyCharges
+          - TotalCharges
+          categorical_features:
+          - gender
+          - Partner
+          - Dependents
+          - PhoneService
+          - MultipleLines
+          - InternetService
+          - OnlineSecurity
+          - OnlineBackup
+          - DeviceProtection
+          - TechSupport
+          - StreamingTV
+          - StreamingMovies
+          - Contract
+          - PaperlessBilling
+          - PaymentMethod
+        training:
+          n_estimators: 100
+          max_depth: 5
+          random_state: 42
+    outs:
+    - path: models/model.joblib
+      hash: md5
+      md5: 925505814e818ed55bb0f1737aea9500
+      size: 526169
+    - path: reports/metrics.json
+      hash: md5
+      md5: c60f54795ee628bd14f16d095fb84baa
+      size: 150
+    - path: reports/plots/confusion_matrix.png
+      hash: md5
+      md5: 183800552b2f19110bfd9b8940d32bd7
+      size: 20394

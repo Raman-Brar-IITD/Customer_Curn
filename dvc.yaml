@@ -1,0 +1,40 @@
+stages:
+  # Stage 1: Process the raw data
+  process_data:
+    cmd: python src/data/make_dataset.py --config=params.yaml
+    deps:
+      - src/data/make_dataset.py
+      - data/raw/Dataset.csv
+    params:
+      - data_processing
+    outs:
+      - data/processed
+
+  # Stage 2: Build features from the processed data
+  build_features:
+    cmd: python src/features/build_features.py --config=params.yaml
+    deps:
+      - src/features/build_features.py
+      - data/processed
+    params:
+      - features
+    outs:
+      - data/features
+
+  # Stage 3: Train the model using the features
+  train_model:
+    cmd: python src/models/train_model.py --config=params.yaml
+    deps:
+      - src/models/train_model.py
+      - data/features
+    params:
+      - training
+      - features
+    metrics:
+      - reports/metrics.json:
+          cache: false
+    plots:
+      - reports/plots/confusion_matrix.png:
+          cache: false
+    outs:
+      - models/model.joblib
